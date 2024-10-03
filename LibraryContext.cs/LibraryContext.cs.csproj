@@ -1,0 +1,38 @@
+using Microsoft.EntityFrameworkCore;
+
+namespace Library
+{
+    public class LibraryContext : DbContext
+    {
+        public DbSet<Librarian> Librarians { get; set; }
+        public DbSet<Reader> Readers { get; set; }
+        public DbSet<DocumentType> DocumentTypes { get; set; }
+        public DbSet<CodeType> CodeTypes { get; set; }
+        public DbSet<Book> Books { get; set; }
+        public DbSet<Author> Authors { get; set; }
+        public DbSet<BookAuthor> BookAuthors { get; set; }
+        public DbSet<BorrowedBook> BorrowedBooks { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            // Настройка подключения к базе данных SQL Server
+            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=LibraryDB;Trusted_Connection=True;");
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            
+            modelBuilder.Entity<BookAuthor>().HasKey(ba => new { ba.BookId, ba.AuthorId });
+
+            modelBuilder.Entity<BookAuthor>()
+                .HasOne(ba => ba.Book)
+                .WithMany(b => b.BookAuthors)
+                .HasForeignKey(ba => ba.BookId);
+
+            modelBuilder.Entity<BookAuthor>()
+                .HasOne(ba => ba.Author)
+                .WithMany(a => a.BookAuthors)
+                .HasForeignKey(ba => ba.AuthorId);
+        }
+    }
+}
